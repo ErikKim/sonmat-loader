@@ -20,11 +20,13 @@ jobs:
         run: |
           cmd /c "build.bat dshaptics_loader"; if ($LASTEXITCODE -ne 0 -or -not (Test-Path dshaptics_loader.dll)) { throw "dshaptics_loader.dll did not build" }
           cmd /c "build.bat dshaptics_loader_dinput8"; if ($LASTEXITCODE -ne 0 -or -not (Test-Path dshaptics_loader_dinput8.dll)) { throw "dshaptics_loader_dinput8.dll did not build" }
+          # 32-bit games (Batman: Arkham Asylum): the same version.dll loader built for x86
+          cmd /c "build.bat dshaptics_loader x86"; if ($LASTEXITCODE -ne 0 -or -not (Test-Path dshaptics_loader_x86.dll)) { throw "dshaptics_loader_x86.dll did not build" }
       - name: Zip
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force pack | Out-Null
-          Copy-Item dshaptics_loader.dll, dshaptics_loader_dinput8.dll, LICENSE pack/
+          Copy-Item dshaptics_loader.dll, dshaptics_loader_dinput8.dll, dshaptics_loader_x86.dll, LICENSE pack/
           $v = if ("${{ github.ref }}" -like "refs/tags/v*") { "${{ github.ref_name }}".Substring(1) } else { "dev" }
           Compress-Archive -Path pack/* -DestinationPath "sonmat-loader-$v.zip" -Force
           "zip: sonmat-loader-$v.zip sha256 $((Get-FileHash "sonmat-loader-$v.zip" -Algorithm SHA256).Hash.ToLower())"
